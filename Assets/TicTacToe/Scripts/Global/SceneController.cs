@@ -10,7 +10,8 @@ namespace TicTacToe.Global
     public enum SceneType
     {
         Boot,
-        Menu
+        Menu,
+        Gameplay
     }
     
     public static class SceneController
@@ -18,7 +19,8 @@ namespace TicTacToe.Global
         private static readonly Dictionary<SceneType, string> scenesPath = new ()
         {
             { SceneType.Boot, "Boot" },
-            { SceneType.Menu, "Menu" }
+            { SceneType.Menu, "Menu" },
+            { SceneType.Gameplay, "Gameplay" }
         };
         
         public static SceneType currentScene { get; private set; }
