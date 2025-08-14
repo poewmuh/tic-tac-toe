@@ -10,7 +10,12 @@ namespace TicTacToe.Gameplay.Helper
             new[]{0,4,8}, new[]{2,4,6}
         };
 
-        private static bool IsHaveWinner()
+        public static bool IsHaveWinner()
+        {
+            return false;
+        }
+
+        public static bool IsBoardFull()
         {
             return false;
         }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -39,11 +40,10 @@ namespace TicTacToe.Gameplay.Core
                 _readyCount = 0;
             }
         }
-        
-        [Rpc(SendTo.Server)]
-        public void PlaceMarkRpc(ulong senderId)
+
+        public void GameEnd()
         {
-            Debug.Log(senderId + " placed mark");
+            SetStateMaster(GameState.GameOver);
         }
 
         private void SetStateMaster(GameState newState)
