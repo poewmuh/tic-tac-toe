@@ -70,17 +70,18 @@ namespace TicTacToe.Networking
                 var (server, code) = await _relay.AllocateAsync(1);
                 _transport.Configure(server);
 
-                SetStatus($"Creating Lobby.. code={code}");
+                SetStatus($"Creating Lobby..");
                 await _lobby.CreateAsync("TicTacToeGame", 2, code);
 
                 SetStatus("Starting Host..");
                 if (_network.StartHost())
                 {
-                    SetStatus($"Loading scene..");
-                    SceneController.LoadSceneLocal(SceneType.Gameplay);
+                    SetStatus($"HOSTED. CODE: {code}");
                 }
                 else
+                {
                     SetStatus("StartHost failed.");
+                }
             }
             catch (System.Exception ex)
             {
@@ -104,11 +105,10 @@ namespace TicTacToe.Networking
                 SetStatus("Starting Client..");
                 if (_network.StartClient())
                 {
-                    SetStatus("Loading scene..");
-                    SceneController.LoadSceneLocal(SceneType.Gameplay);
+                    SetStatus("CONNECTED");
                 }
                 else
-                    SetStatus("StartClient failed.");
+                    SetStatus("Connection failed");
             }
             catch (System.Exception ex)
             {
@@ -117,8 +117,16 @@ namespace TicTacToe.Networking
             }
         }
 
-        private void OnClientConnected(ulong clientId) => SetStatus($"Connected: {clientId}");
-        private void OnClientDisconnected(ulong clientId) => SetStatus($"Disconnected: {clientId}");
+        private void OnClientConnected(ulong clientId)
+        {
+            SceneController.LoadNetworkScene(SceneType.Gameplay);
+            SetStatus($"Connected: {clientId}");
+        }
+
+        private void OnClientDisconnected(ulong clientId)
+        {
+            SetStatus($"Disconnected: {clientId}");
+        }
 
         private void SetStatus(string s)
         {
