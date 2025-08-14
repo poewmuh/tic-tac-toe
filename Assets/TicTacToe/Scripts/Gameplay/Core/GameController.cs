@@ -1,3 +1,4 @@
+using System.Linq;
 using TicTacToe.Gameplay.Helper;
 using UniRx;
 using Unity.Netcode;
@@ -58,8 +59,10 @@ namespace TicTacToe.Gameplay.Core
         private void SetRoles()
         {
             var isServerStarts = Random.value < .5f;
-            xClientId.Value = isServerStarts ? NetworkManager.ServerClientId : NetworkManager.ConnectedClientsIds[0];
-            oClientId.Value = !isServerStarts ? NetworkManager.ServerClientId : NetworkManager.ConnectedClientsIds[0];
+            var serverId = NetworkManager.ServerClientId;
+            var clientId = NetworkManager.ConnectedClientsIds.First(x => x != serverId);
+            xClientId.Value = isServerStarts ? serverId : clientId;
+            oClientId.Value = isServerStarts ? clientId : serverId;
             SetNextPlayerTurn();
         }
 
@@ -69,8 +72,10 @@ namespace TicTacToe.Gameplay.Core
             {
                 currentTurnClientId.Value = oClientId.Value;
             }
-
-            currentTurnClientId.Value = xClientId.Value;
+            else
+            {
+                currentTurnClientId.Value = xClientId.Value;
+            }
         }
 
         [Rpc(SendTo.Server)]
