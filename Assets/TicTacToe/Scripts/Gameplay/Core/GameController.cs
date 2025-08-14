@@ -13,7 +13,7 @@ namespace TicTacToe.Gameplay.Core
         public readonly NetworkVariable<ulong> oClientId = new();
         public readonly NetworkVariable<ulong> currentTurnClientId = new();
         
-        private readonly NetworkList<CellValue> _board = new();
+        public readonly NetworkList<CellValue> board = new();
         private GameSession _gameSession;
         private readonly CompositeDisposable _disp = new();
         
@@ -44,7 +44,7 @@ namespace TicTacToe.Gameplay.Core
         {
             for (int i = 0; i < 9; i++)
             {
-                _board.Add(new CellValue(Cell.Empty));
+                board.Add(new CellValue(Cell.Empty));
             }
         }
 
@@ -82,14 +82,14 @@ namespace TicTacToe.Gameplay.Core
         public void PlaceMarkRpc(int index, ulong clientId)
         {
             if (_gameSession.currentState.Value is not GameState.Playing) return;
+            if (board[index].Value is not Cell.Empty) return;
             
-            _board[index] = new CellValue(GetCellByClientId(clientId));
-            Debug.Log(clientId + " placed mark!");
-            if (TicTacHelper.IsHaveWinner())
+            board[index] = new CellValue(GetCellByClientId(clientId));
+            if (TicTacHelper.IsHaveWinner(board))
             {
                 _gameSession.GameEnd();
             }
-            else if (TicTacHelper.IsBoardFull())
+            else if (TicTacHelper.IsBoardFull(board))
             {
                 _gameSession.GameEnd();
             }
@@ -107,11 +107,11 @@ namespace TicTacToe.Gameplay.Core
 
         private void ResetBoard()
         {
-            for (int i = 0; i < _board.Count; i++)
+            for (int i = 0; i < board.Count; i++)
             {
-                var newCell = _board[i];
+                var newCell = board[i];
                 newCell.Value = Cell.Empty;
-                _board[i] = newCell;
+                board[i] = newCell;
             }
         }
     }
