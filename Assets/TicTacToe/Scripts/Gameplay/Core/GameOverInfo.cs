@@ -16,6 +16,7 @@ namespace TicTacToe.Gameplay.Core
         public GameOverReason reason; 
         public Cell winner;
         public int i0, i1, i2;
+        public int gameCount;
 
         public void NetworkSerialize<T>(BufferSerializer<T> s) where T : IReaderWriter
         {
@@ -24,12 +25,14 @@ namespace TicTacToe.Gameplay.Core
             s.SerializeValue(ref i0);
             s.SerializeValue(ref i1);
             s.SerializeValue(ref i2);
+            s.SerializeValue(ref gameCount);
         }
 
         public bool Equals(GameOverInfo other)
         {
             return reason == other.reason && winner == other.winner &&
-                   i0 == other.i0 && i1 == other.i1 && i2 == other.i2;
+                   i0 == other.i0 && i1 == other.i1 && i2 == other.i2 &&
+                   gameCount == other.gameCount;
         }
     }
 }

@@ -1928,6 +1928,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1469974948}
   - component: {fileID: 1469974949}
+  - component: {fileID: 1469974952}
+  - component: {fileID: 1469974951}
+  - component: {fileID: 1469974950}
   m_Layer: 5
   m_Name: GameHUD
   m_TagString: Untagged
@@ -1970,9 +1973,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c2224fe6b4f3294badd8ce50d67051c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _readyButton: {fileID: 1213242030}
-  _restartButton: {fileID: 1694645028}
-  _cellButton:
+  _buttonsView: {fileID: 1469974952}
+  _statusBannerView: {fileID: 1469974951}
+  _boardInputView: {fileID: 1469974950}
+--- !u!114 &1469974950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469974947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60174a20916237c459d526b816b0491a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cellButtons:
   - {fileID: 1365259150}
   - {fileID: 321442851}
   - {fileID: 1971282659}
@@ -1982,7 +1998,33 @@ MonoBehaviour:
   - {fileID: 335460840}
   - {fileID: 1051931201}
   - {fileID: 1188927303}
+--- !u!114 &1469974951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469974947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8390684b6b67a8f449c4969b457299e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   _statusText: {fileID: 805156982}
+--- !u!114 &1469974952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469974947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a42815c10deaeb146a6dd5a0aaeaddae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _readyButton: {fileID: 1213242030}
+  _restartButton: {fileID: 1694645028}
 --- !u!1 &1583164082
 GameObject:
   m_ObjectHideFlags: 0

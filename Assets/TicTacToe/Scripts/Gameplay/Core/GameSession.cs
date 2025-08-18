@@ -21,9 +21,9 @@ namespace TicTacToe.Gameplay.Core
         }
 
         [Rpc(SendTo.Server)]
-        public void SetReadyRpc(ulong senderId)
+        public void SetReadyRpc(RpcParams rpcParams = default)
         {
-            Debug.Log(senderId + " is ready");
+            Debug.Log(rpcParams.Receive.SenderClientId + " is ready");
             _readyCount++;
             if (_readyCount == MAX_PLAYERS)
             {
@@ -33,9 +33,9 @@ namespace TicTacToe.Gameplay.Core
         }
         
         [Rpc(SendTo.Server)]
-        public void SetRestartRpc(ulong senderId)
+        public void SetRestartRpc(RpcParams rpcParams = default)
         {
-            Debug.Log(senderId + " is ready");
+            Debug.Log(rpcParams.Receive.SenderClientId + " is ready");
             _readyCount++;
             if (_readyCount == MAX_PLAYERS)
             {

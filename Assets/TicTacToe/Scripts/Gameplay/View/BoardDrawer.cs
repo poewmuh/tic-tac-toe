@@ -92,7 +92,6 @@ namespace TicTacToe.Gameplay.View
         {
             int row = index / 3;
             int col = index % 3;
-            Debug.Log($"Index: {index}, Row: {row}, Col: {col}");
             return new Vector3(col * _cellSizeX, row * _cellSizeY, 0f);
         }
     }

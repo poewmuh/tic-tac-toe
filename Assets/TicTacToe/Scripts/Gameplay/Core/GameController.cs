@@ -16,6 +16,7 @@ namespace TicTacToe.Gameplay.Core
         
         public readonly NetworkList<CellValue> board = new();
         private GameSession _gameSession;
+        private int _gameCount;
         private readonly CompositeDisposable _disp = new();
         
         [Inject]
@@ -54,6 +55,7 @@ namespace TicTacToe.Gameplay.Core
             switch (state)
             {
                 case GameState.Playing:
+                    _gameCount++;
                     ResetBoard();
                     SetRoles();
                     break;
@@ -67,7 +69,8 @@ namespace TicTacToe.Gameplay.Core
             gameOverInfo.Value = new GameOverInfo()
             {
                 reason = GameOverReason.Abort,
-                winner = Cell.Empty
+                winner = Cell.Empty,
+                gameCount = _gameCount
             };
             SetGameEnd();
         }
@@ -95,35 +98,41 @@ namespace TicTacToe.Gameplay.Core
         }
 
         [Rpc(SendTo.Server)]
-        public void PlaceMarkRpc(int index, ulong clientId)
+        public void PlaceMarkRpc(int index, RpcParams rpcParams = default)
         {
+            Debug.Log($"Place Mark Rpc index:{index}");
             if (_gameSession.currentState.Value is not GameState.Playing) return;
             if (board[index].Value is not Cell.Empty) return;
             
-            board[index] = new CellValue(GetCellByClientId(clientId));
+            board[index] = new CellValue(GetCellByClientId(rpcParams.Receive.SenderClientId));
             if (TicTacHelper.IsHaveWinner(board, out var winLine))
             {
+                Debug.Log($"Winner: {board[index].Value}");
                 gameOverInfo.Value = new GameOverInfo()
                 {
                     reason = GameOverReason.Win,
-                    winner = clientId == xClientId.Value ? Cell.X : Cell.O,
+                    winner = rpcParams.Receive.SenderClientId == xClientId.Value ? Cell.X : Cell.O,
                     i0 = winLine[0],
                     i1 = winLine[1],
                     i2 = winLine[2],
+                    gameCount = _gameCount
                 };
                 SetGameEnd();
             }
             else if (TicTacHelper.IsBoardFull(board))
             {
+                Debug.Log($"Draw: {board[index].Value}");
                 gameOverInfo.Value = new GameOverInfo()
                 {
                     reason = GameOverReason.Draw,
-                    winner = Cell.Empty
+                    winner = Cell.Empty,
+                    gameCount = _gameCount
                 };
                 SetGameEnd();
             }
             else
             {
+                Debug.Log($"Set next player turn: {board[index].Value}");
                 SetNextPlayerTurn();
             }
         }
