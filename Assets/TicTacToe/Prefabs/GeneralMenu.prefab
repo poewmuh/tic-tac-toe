@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7192145212017041312}
   - component: {fileID: 6626647662563605324}
+  - component: {fileID: 799971595761654259}
   m_Layer: 5
   m_Name: GeneralMenu
   m_TagString: Untagged
@@ -50,9 +51,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c987923a344b364fb94d50f6f8e23b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &799971595761654259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919889342125178119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c51ca6b8ef2f2543a5742b8623e04bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   _hostButton: {fileID: 3010763895193262480}
   _quickJoinButton: {fileID: 5953465410737318412}
-  _statusText: {fileID: 7079862189101483216}
+  statusText: {fileID: 7079862189101483216}
 --- !u!1 &1024769293354326024
 GameObject:
   m_ObjectHideFlags: 0
