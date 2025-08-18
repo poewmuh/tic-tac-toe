@@ -5,7 +5,7 @@ using Unity.Services.Lobbies.Models;
 
 namespace TicTacToe.Networking
 {
-    public interface ILobbyHandler
+    public interface ILobbyHandler : IDisposable
     {
         ReactiveProperty<Lobby> Current { get; }
         UniTask<Lobby> CreateAsync(string name, int maxPlayers, string relayJoinCode);
@@ -14,7 +14,7 @@ namespace TicTacToe.Networking
         UniTaskVoid DeleteAsync();
     }
     
-    public class LobbyHandler : ILobbyHandler, IDisposable
+    public class LobbyHandler : ILobbyHandler
     {
         public ReactiveProperty<Lobby> Current { get; } = new(null);
         CompositeDisposable _disp = new();
@@ -22,6 +22,9 @@ namespace TicTacToe.Networking
         public async UniTask<Lobby> CreateAsync(string name, int maxPlayers, string relayJoinCode)
         {
             Current.Value = await LobbyHelper.CreateLobbyAsync(name, maxPlayers, relayJoinCode);
+            Observable.Interval(TimeSpan.FromSeconds(15))
+                .Subscribe(_ => LobbyHelper.SendHeartbeatPing(Current.Value.Id).Forget())
+                .AddTo(_disp);
 
             return Current.Value;
         }

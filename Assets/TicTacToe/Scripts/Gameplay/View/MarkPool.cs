@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using AiaalTools.Data.Loader;
+using TicTacToe.Gameplay.Core;
+using TicTacToe.Gameplay.Mark;
 using UnityEngine;
 
 namespace TicTacToe.Gameplay.View
@@ -12,8 +14,8 @@ namespace TicTacToe.Gameplay.View
         private readonly GameObject _crossPrefab;
         private readonly GameObject _circlePrefab;
         
-        private readonly Queue<GameObject> _circlePool = new();
-        private readonly Queue<GameObject> _crossPool = new();
+        private readonly Queue<Marker> _circlePool = new();
+        private readonly Queue<Marker> _crossPool = new();
 
         private readonly Transform _parent;
         
@@ -37,50 +39,51 @@ namespace TicTacToe.Gameplay.View
             _crossPool.Clear();
         }
 
-        private void CreatePool(GameObject prefab, Queue<GameObject> pool, int count)
+        private void CreatePool(GameObject prefab, Queue<Marker> pool, int count)
         {
             for (int i = 0; i < count; i++)
             {
-                var go = Object.Instantiate(prefab, _parent);
-                go.SetActive(false);
-                pool.Enqueue(go);
+                var marker = CreateMarker(prefab);
+                marker.gameObject.SetActive(false);
+                pool.Enqueue(marker);
             }
         }
         
-        public GameObject GetOrCreateCircle(Vector3 pos)
+        public Marker GetFromPool(Cell cellType, Vector3 localPos)
         {
-            var go = GetFromPool(_circlePrefab, _circlePool);
-            go.transform.position = pos;
-            go.SetActive(true);
-            return go;
+            var isCross = cellType is Cell.X;
+            var pool = isCross ? _crossPool : _circlePool;
+            var prefab = isCross ? _crossPrefab : _circlePrefab;
+            
+            var marker = GetFromPool(prefab, pool);
+            marker.transform.localPosition = localPos;
+            marker.gameObject.SetActive(true);
+            return marker;
         }
 
-        public GameObject GetOrCreateCross(Vector3 pos)
+        public void Return(Marker marker)
         {
-            var go = GetFromPool(_crossPrefab, _crossPool);
-            go.transform.position = pos;
-            go.SetActive(true);
-            return go;
-        }
-
-        public void Return(GameObject go, bool isCircle)
-        {
-            go.SetActive(false);
-            go.transform.SetParent(_parent);
-            if (isCircle)
-                _circlePool.Enqueue(go);
+            marker.gameObject.SetActive(false);
+            marker.transform.SetParent(_parent);
+            if (marker.Cell is Cell.O)
+                _circlePool.Enqueue(marker);
             else
-                _crossPool.Enqueue(go);
+                _crossPool.Enqueue(marker);
         }
 
-        private GameObject GetFromPool(GameObject prefab, Queue<GameObject> pool)
+        private Marker GetFromPool(GameObject prefab, Queue<Marker> pool)
         {
             if (pool.Count > 0)
                 return pool.Dequeue();
 
-            var go = Object.Instantiate(prefab, _parent);
-            go.SetActive(false);
-            return go;
+            var marker = CreateMarker(prefab);
+            marker.gameObject.SetActive(false);
+            return marker;
+        }
+
+        private Marker CreateMarker(GameObject prefab)
+        {
+            return Object.Instantiate(prefab, _parent).GetComponent<Marker>();
         }
     }
 }

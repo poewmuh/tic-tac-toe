@@ -19,6 +19,7 @@ namespace TicTacToe.Gameplay.HUD
         private GameSession _gameSession;
         private GameController _gameController;
         private NetworkManager _networkManager;
+        private bool _isCrossTurn;
         
         [Inject]
         private void Construct(GameSession gameSession, GameController gameController, NetworkManager networkManager)
@@ -44,12 +45,23 @@ namespace TicTacToe.Gameplay.HUD
                     .Subscribe(_ => TrySendMark(index)).AddTo(this);
             }
             
+            _gameSession.currentState.ObserveValue().Subscribe(StateChanged).AddTo(this);
             _gameController.currentTurnClientId.ObserveValue()
                 .Subscribe(OnTurnChanged).AddTo(this);
         }
 
+        private void StateChanged(GameState state)
+        {
+            if (state is GameState.GameOver)
+            {
+                ChangeStatusText("Game Over" + (_isCrossTurn ? " X" : " O") + " Win!!");
+                _restartButton.gameObject.SetActive(true);
+            }
+        }
+
         private void OnTurnChanged(ulong clientId)
         {
+            _isCrossTurn = clientId == _gameController.xClientId.Value;
             ChangeStatusText(clientId == _networkManager.LocalClientId ? "YOUR TURN" : "ENEMY TURN");
         }
 

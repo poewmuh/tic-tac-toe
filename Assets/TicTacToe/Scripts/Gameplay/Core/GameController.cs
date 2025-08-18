@@ -50,9 +50,15 @@ namespace TicTacToe.Gameplay.Core
 
         private void StateChanged(GameState state)
         {
-            if (state is GameState.Playing)
+            switch (state)
             {
-                SetRoles();
+                case GameState.Playing:
+                    ResetBoard();
+                    SetRoles();
+                    break;
+                case GameState.GameOver:
+                    
+                    break;
             }
         }
 
