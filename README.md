@@ -1,7 +1,10 @@
 # TIC-TAC-TOE
 - Игра крестики-нолики на двоих по интернету.
 - Используемая версия: Unity 6000.0.47f1
-- Использован Zenject + UniRx 
+- Использован Zenject + UniRx + Addressables + Unity Netcode for GameObjects + Relay + Lobby
+- Сцены: Boot, Menu, Gameplay
+# TOOLBAR
+Кастомный тулбар PlayBoot запускает сцену Boot (при выходе старая сцена на которой вы работае сохраняется), Menu и Boot просто быстрые переходы чтобы не искать сцену
 # BOOT
 Это просто бутстрап сцена с лого
 # MENU
