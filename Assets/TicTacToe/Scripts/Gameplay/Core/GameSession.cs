@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using System;
+using TicTacToe.Gameplay.Helper;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,9 +7,11 @@ namespace TicTacToe.Gameplay.Core
 {
     public class GameSession : NetworkBehaviour
     {
+        private const int MAX_PLAYERS = 2;
+        
         public readonly NetworkVariable<GameState> currentState = new();
-
-        private int _maxPlayers = 2;
+        public IObservable<ulong> OnClientDisconnect() => NetworkManager.Singleton.ObserveClientDisconnected();
+        
         private int _readyCount;
 
         public override void OnNetworkSpawn()
@@ -22,7 +25,7 @@ namespace TicTacToe.Gameplay.Core
         {
             Debug.Log(senderId + " is ready");
             _readyCount++;
-            if (_readyCount == _maxPlayers)
+            if (_readyCount == MAX_PLAYERS)
             {
                 SetStateMaster(GameState.Playing);
                 _readyCount = 0;
@@ -34,7 +37,7 @@ namespace TicTacToe.Gameplay.Core
         {
             Debug.Log(senderId + " is ready");
             _readyCount++;
-            if (_readyCount == _maxPlayers)
+            if (_readyCount == MAX_PLAYERS)
             {
                 SetStateMaster(GameState.Playing);
                 _readyCount = 0;

@@ -19,7 +19,6 @@ namespace TicTacToe.Gameplay.HUD
         private GameSession _gameSession;
         private GameController _gameController;
         private NetworkManager _networkManager;
-        private bool _isCrossTurn;
         
         [Inject]
         private void Construct(GameSession gameSession, GameController gameController, NetworkManager networkManager)
@@ -44,25 +43,53 @@ namespace TicTacToe.Gameplay.HUD
                 _cellButton[i].OnClickAsObservable()
                     .Subscribe(_ => TrySendMark(index)).AddTo(this);
             }
-            
-            _gameSession.currentState.ObserveValue().Subscribe(StateChanged).AddTo(this);
+
+            _gameSession.currentState.ObserveValue().Subscribe(OnStateChange).AddTo(this);
+            _gameController.gameOverInfo.ObserveValue().Subscribe(OnGameOver).AddTo(this);
             _gameController.currentTurnClientId.ObserveValue()
                 .Subscribe(OnTurnChanged).AddTo(this);
         }
 
-        private void StateChanged(GameState state)
+        private void OnGameOver(GameOverInfo gameOverInfo)
         {
-            if (state is GameState.GameOver)
+            var statusText = "";
+            switch (gameOverInfo.reason)
             {
-                ChangeStatusText("Game Over" + (_isCrossTurn ? " X" : " O") + " Win!!");
+                case GameOverReason.Draw:
+                    statusText = "Draw!";
+                    break;
+                case GameOverReason.Win:
+                    statusText = (gameOverInfo.winner is Cell.O ? "O" : "X") + " ARE WINNER!";
+                    break;
+                case GameOverReason.Abort:
+                    statusText = "GAME ABORTED!";
+                    break;
+            }
+
+            ChangeStatusText(statusText);
+
+            if (gameOverInfo.reason is not GameOverReason.Abort)
+            {
                 _restartButton.gameObject.SetActive(true);
+            }
+        }
+
+        private void OnStateChange(GameState newState)
+        {
+            if (newState is GameState.Playing)
+            {
+                UpdateTurnStatus(_gameController.currentTurnClientId.Value);
             }
         }
 
         private void OnTurnChanged(ulong clientId)
         {
-            _isCrossTurn = clientId == _gameController.xClientId.Value;
-            ChangeStatusText(clientId == _networkManager.LocalClientId ? "YOUR TURN" : "ENEMY TURN");
+            UpdateTurnStatus(clientId);
+        }
+
+        private void UpdateTurnStatus(ulong currentTurnClientId)
+        {
+            ChangeStatusText(currentTurnClientId == _networkManager.LocalClientId ? "YOUR TURN" : "ENEMY TURN");
         }
 
         private void ChangeStatusText(string text)
@@ -87,6 +114,7 @@ namespace TicTacToe.Gameplay.HUD
         private void SendRestart()
         {
             _restartButton.gameObject.SetActive(false);
+            ChangeStatusText("Waiting your opponent..");
             _gameSession.SetRestartRpc(_networkManager.LocalClientId);
         }
     }

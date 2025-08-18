@@ -12,6 +12,7 @@ namespace TicTacToe.Gameplay.Core
         public readonly NetworkVariable<ulong> xClientId = new();
         public readonly NetworkVariable<ulong> oClientId = new();
         public readonly NetworkVariable<ulong> currentTurnClientId = new();
+        public readonly NetworkVariable<GameOverInfo> gameOverInfo = new();
         
         public readonly NetworkList<CellValue> board = new();
         private GameSession _gameSession;
@@ -29,8 +30,8 @@ namespace TicTacToe.Gameplay.Core
             {
                 InitializeBoard();
                 currentTurnClientId.Value = int.MaxValue;
-                _gameSession.currentState.ObserveValue().Subscribe(StateChanged)
-                    .AddTo(_disp);
+                _gameSession.OnClientDisconnect().Subscribe(OnClientDisconnect).AddTo(_disp);
+                _gameSession.currentState.ObserveValue().Subscribe(StateChanged).AddTo(_disp);
             }
         }
 
@@ -57,9 +58,18 @@ namespace TicTacToe.Gameplay.Core
                     SetRoles();
                     break;
                 case GameState.GameOver:
-                    
                     break;
             }
+        }
+
+        private void OnClientDisconnect(ulong clientId)
+        {
+            gameOverInfo.Value = new GameOverInfo()
+            {
+                reason = GameOverReason.Abort,
+                winner = Cell.Empty
+            };
+            SetGameEnd();
         }
 
         private void SetRoles()
@@ -69,7 +79,7 @@ namespace TicTacToe.Gameplay.Core
             var clientId = NetworkManager.ConnectedClientsIds.First(x => x != serverId);
             xClientId.Value = isServerStarts ? serverId : clientId;
             oClientId.Value = isServerStarts ? clientId : serverId;
-            SetNextPlayerTurn();
+            currentTurnClientId.Value = xClientId.Value;
         }
 
         private void SetNextPlayerTurn()
@@ -91,18 +101,36 @@ namespace TicTacToe.Gameplay.Core
             if (board[index].Value is not Cell.Empty) return;
             
             board[index] = new CellValue(GetCellByClientId(clientId));
-            if (TicTacHelper.IsHaveWinner(board))
+            if (TicTacHelper.IsHaveWinner(board, out var winLine))
             {
-                _gameSession.GameEnd();
+                gameOverInfo.Value = new GameOverInfo()
+                {
+                    reason = GameOverReason.Win,
+                    winner = clientId == xClientId.Value ? Cell.X : Cell.O,
+                    i0 = winLine[0],
+                    i1 = winLine[1],
+                    i2 = winLine[2],
+                };
+                SetGameEnd();
             }
             else if (TicTacHelper.IsBoardFull(board))
             {
-                _gameSession.GameEnd();
+                gameOverInfo.Value = new GameOverInfo()
+                {
+                    reason = GameOverReason.Draw,
+                    winner = Cell.Empty
+                };
+                SetGameEnd();
             }
             else
             {
                 SetNextPlayerTurn();
             }
+        }
+
+        private void SetGameEnd()
+        {
+            _gameSession.GameEnd();
         }
 
         private Cell GetCellByClientId(ulong clientId)

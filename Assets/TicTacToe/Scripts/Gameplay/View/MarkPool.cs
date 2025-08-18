@@ -63,6 +63,7 @@ namespace TicTacToe.Gameplay.View
 
         public void Return(Marker marker)
         {
+            marker.StopHighlight();
             marker.gameObject.SetActive(false);
             marker.transform.SetParent(_parent);
             if (marker.Cell is Cell.O)

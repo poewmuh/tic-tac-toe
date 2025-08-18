@@ -15,10 +15,12 @@ namespace TicTacToe.Gameplay.View
         [SerializeField] private float _cellSizeX;
         [SerializeField] private float _cellSizeY;
 
-        
+        private readonly HashSet<int> _pendingHighlights = new();
         private readonly Dictionary<int, Marker> _activeMarkers = new ();
         private GameController _gameController;
         private MarkPool _markPool;
+
+        private bool _isGameOver;
         
         [Inject]
         private void Construct(GameController gameController)
@@ -28,10 +30,34 @@ namespace TicTacToe.Gameplay.View
 
         private void Start()
         {
+            _gameController.gameOverInfo.ObserveValue().Subscribe(OnGameOver).AddTo(this);
             _gameController.board.ObserveListChanged()
                 .Subscribe(RefreshBoard).AddTo(this);
 
             _markPool = new MarkPool(_drawAreaParent, 3);
+        }
+
+        private void OnGameOver(GameOverInfo info)
+        {
+            _isGameOver = true;
+            if (info.reason == GameOverReason.Win)
+            {
+                TryHighlight(info.i0);
+                TryHighlight(info.i1);
+                TryHighlight(info.i2);
+            }
+        }
+
+        private void TryHighlight(int index)
+        {
+            if (_activeMarkers.TryGetValue(index, out var marker))
+            {
+                marker.Highlight();
+            }
+            else
+            {
+                _pendingHighlights.Add(index);
+            }
         }
 
         private void OnDestroy()
@@ -47,6 +73,7 @@ namespace TicTacToe.Gameplay.View
             {
                 if (_activeMarkers.TryGetValue(board.Index, out var marker))
                 {
+                    _isGameOver = false;
                     _markPool.Return(marker);
                     _activeMarkers.Remove(board.Index);
                 }
@@ -54,7 +81,11 @@ namespace TicTacToe.Gameplay.View
                 return;
             }
             var mark = _markPool.GetFromPool(board.Value.Value, pos);
-            _activeMarkers.Add(board.Index, mark);
+            _activeMarkers[board.Index] = mark;
+            if (_isGameOver && _pendingHighlights.Remove(board.Index))
+            {
+                mark.Highlight();
+            }
         }
 
         private Vector3 IndexToLocalPos(int index)
